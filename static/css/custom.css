@@ -1,0 +1,7 @@
+@charset "UTF-8";
+
+pre code {
+  font-family: monospace, monospace;
+  font-size: 1.1em;
+  font-weight: 500;
+}
