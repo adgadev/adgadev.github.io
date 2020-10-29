@@ -13,13 +13,13 @@ hasCJKLanguage = true
 home = ["HTML", "RSS", "Algolia"]
 
 [params]
-  header_image = "img/home-bg-jeep.jpg"
+  header_image = "img/bg/simon-berger-t6zocP52Fg0-unsplash.jpg"
   SEOTitle = "adgadev | Adam Gaj Blog"
   description = "adgadev"
   keyword = "adgadev, JPlusOne"
   slogan = "Developer is an organism that turns coffee into code."
 
-  image_404 = "img/404-bg.jpg"
+  image_404 = "img/bg/404-bg.jpg"
   title_404 = "Page not found :("
   omit_categories = false
 
@@ -55,7 +55,7 @@ home = ["HTML", "RSS", "Algolia"]
 
   friends = false
   bookmarks = false
-  about_me = true
+  about_me = false # TODO:
 
   # Include any custom CSS and/or JS files, url or relative to /static folder
   custom_css = ["css/custom.css", "css/base16.dark.css"]

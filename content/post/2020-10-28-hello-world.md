@@ -5,7 +5,7 @@ subtitle:   "Hello World, Hello Blog"
 date:       2020-10-28
 author:     "Adam Gaj"
 URL:        "/2020/10/28/hello-world/"
-image:      "https://img.zhaohuabing.com/post-bg-2015.jpg"
+image:      "img/bg/post-bg-coffee.jpeg"
 published:  true
 ---
 
