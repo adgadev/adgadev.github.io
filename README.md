@@ -1,6 +1,6 @@
 # adgadev.github.io
 
-This repo contains the source code of the [adgadev.github.io](adgadev.github.io) website.
+This repo contains the source code of the [https://adgadev.github.io](https://adgadev.github.io) website.
 It is built using [Hugo](https://gohugo.io/) and hosted on [GitHub Pages](https://pages.github.com/).
 
 ## Editing
