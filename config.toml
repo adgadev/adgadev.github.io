@@ -35,8 +35,8 @@ home = ["HTML", "RSS", "Algolia"]
   algolia_apiKey = ""
 
   # Sidebar settings
-  sidebar_about_description = "Java Software Engineer, Open Source Enthusiast"
-  sidebar_avatar = "img/zhaohuabing.png"      # use absolute URL, seeing it's used in both `/` and `/about/`
+  sidebar_about_description = "Senior Software Engineer at Pragmatic Coders"
+  sidebar_avatar = "/img/adga.jpg"      # use absolute URL, seeing it's used in both `/` and `/about/`
 
   featured_tags = true
   featured_condition_size = 0
@@ -55,7 +55,7 @@ home = ["HTML", "RSS", "Algolia"]
 
   friends = false
   bookmarks = false
-  about_me = false # TODO:
+  about_me = true
 
   # Include any custom CSS and/or JS files, url or relative to /static folder
   custom_css = ["css/custom.css", "css/base16.dark.css"]
