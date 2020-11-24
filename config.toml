@@ -1,10 +1,10 @@
-baseurl = "https://adgadev.github.io"
+baseurl = "https://adgadev.com"
 title = "/adgadev/"
 theme = "hugo-theme-cleanwhite"
 languageCode = "en-us"
 # Enable comments by entering your Disqus shortname
 disqusShortname = "adgadev"
-googleAnalytics = ""
+googleAnalytics = "G-WCGW381B17"
 preserveTaxonomyNames = true
 paginate = 5 #frontpage pagination
 hasCJKLanguage = true
@@ -14,7 +14,7 @@ home = ["HTML", "RSS", "Algolia"]
 
 [params]
   header_image = "img/bg/simon-berger-t6zocP52Fg0-unsplash.jpg"
-  SEOTitle = "adgadev | Adam Gaj Blog"
+  SEOTitle = "Adam Gaj Blog"
   description = "adgadev"
   keyword = "adgadev, JPlusOne"
   slogan = "Developer is an organism that turns coffee into code."
@@ -39,7 +39,7 @@ home = ["HTML", "RSS", "Algolia"]
   sidebar_avatar = "img/zhaohuabing.png"      # use absolute URL, seeing it's used in both `/` and `/about/`
 
   featured_tags = true
-  featured_condition_size = 1
+  featured_condition_size = 0
 
   # Baidu Analytics
   # ba_track_id = ""
