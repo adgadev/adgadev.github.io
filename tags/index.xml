@@ -5,6 +5,70 @@
     <link>https://adgadev.com/tags/</link>
     <description>Recent content in Tags on /adgadev/</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language><atom:link href="https://adgadev.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    <language>en-us</language>
+    <lastBuildDate>Wed, 02 Dec 2020 20:00:00 +0000</lastBuildDate><atom:link href="https://adgadev.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Java</title>
+      <link>https://adgadev.com/tags/java/</link>
+      <pubDate>Wed, 02 Dec 2020 20:00:00 +0000</pubDate>
+      
+      <guid>https://adgadev.com/tags/java/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>JPA</title>
+      <link>https://adgadev.com/tags/jpa/</link>
+      <pubDate>Wed, 02 Dec 2020 20:00:00 +0000</pubDate>
+      
+      <guid>https://adgadev.com/tags/jpa/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>JPlusOne</title>
+      <link>https://adgadev.com/tags/jplusone/</link>
+      <pubDate>Wed, 02 Dec 2020 20:00:00 +0000</pubDate>
+      
+      <guid>https://adgadev.com/tags/jplusone/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>N&#43;1 SELECT problem</title>
+      <link>https://adgadev.com/tags/n&#43;1-select-problem/</link>
+      <pubDate>Wed, 02 Dec 2020 20:00:00 +0000</pubDate>
+      
+      <guid>https://adgadev.com/tags/n&#43;1-select-problem/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Performance</title>
+      <link>https://adgadev.com/tags/performance/</link>
+      <pubDate>Wed, 02 Dec 2020 20:00:00 +0000</pubDate>
+      
+      <guid>https://adgadev.com/tags/performance/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Spring Boot</title>
+      <link>https://adgadev.com/tags/spring-boot/</link>
+      <pubDate>Wed, 02 Dec 2020 20:00:00 +0000</pubDate>
+      
+      <guid>https://adgadev.com/tags/spring-boot/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>SQL</title>
+      <link>https://adgadev.com/tags/sql/</link>
+      <pubDate>Wed, 02 Dec 2020 20:00:00 +0000</pubDate>
+      
+      <guid>https://adgadev.com/tags/sql/</guid>
+      <description></description>
+    </item>
+    
   </channel>
 </rss>

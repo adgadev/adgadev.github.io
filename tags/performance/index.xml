@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on /adgadev/</title>
-    <link>https://adgadev.com/post/</link>
-    <description>Recent content in Posts on /adgadev/</description>
+    <title>Performance on /adgadev/</title>
+    <link>https://adgadev.com/tags/performance/</link>
+    <description>Recent content in Performance on /adgadev/</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 02 Dec 2020 20:00:00 +0000</lastBuildDate><atom:link href="https://adgadev.com/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 02 Dec 2020 20:00:00 +0000</lastBuildDate><atom:link href="https://adgadev.com/tags/performance/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Finding origin and context of JPA issued SQL statements</title>
       <link>https://adgadev.com/finding-origin-and-context-of-jpa-issued-sql-statemets/</link>

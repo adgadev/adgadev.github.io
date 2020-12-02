@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="/adgadev/">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="https://adgadev.com/img/bg/simon-berger-t6zocP52Fg0-unsplash.jpg">
+    <meta property="twitter:image" content="https://adgadev.com/img/bg/simon-berger-t6zocP52Fg0-unsplash.jpg" />
+    
+
+    
+    <meta name="title" content="Finding origin and context of JPA issued SQL statements" />
+    <meta property="og:title" content="Finding origin and context of JPA issued SQL statements" />
+    <meta property="twitter:title" content="Finding origin and context of JPA issued SQL statements" />
+    
+
+    
+    <meta name="description" content="adgadev">
+    <meta property="og:description" content="adgadev" />
+    <meta property="twitter:description" content="adgadev" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="adgadev, JPlusOne">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>Finding origin and context of JPA issued SQL statements-Adam Gaj Blog</title>
+
+    <link rel="canonical" href="/finding-origin-and-context-of-jpa-issued-sql-statemets">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+    
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    
+    <link rel="stylesheet" href="https://adgadev.com/css/custom.css"><link rel="stylesheet" href="https://adgadev.com/css/base16.dark.css">
+
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+
+    
+    
+
+</head>
+
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">/adgadev/</a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                        
+                        <li>
+                            <a href="/categories/blog">blog</a>
+                        </li>
+                        
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('/img/bg/aaron-burson-aE3gcKW1BxU-unsplash.jpg')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/java" title="Java">
+                            Java
+                        </a>
+                        
+                        <a class="tag" href="/tags/jpa" title="JPA">
+                            JPA
+                        </a>
+                        
+                        <a class="tag" href="/tags/sql" title="SQL">
+                            SQL
+                        </a>
+                        
+                        <a class="tag" href="/tags/spring-boot" title="Spring Boot">
+                            Spring Boot
+                        </a>
+                        
+                        <a class="tag" href="/tags/n&#43;1-select-problem" title="N&#43;1 SELECT problem">
+                            N&#43;1 SELECT problem
+                        </a>
+                        
+                        <a class="tag" href="/tags/jplusone" title="JPlusOne">
+                            JPlusOne
+                        </a>
+                        
+                        <a class="tag" href="/tags/performance" title="Performance">
+                            Performance
+                        </a>
+                        
+                    </div>
+                    <h1>Finding origin and context of JPA issued SQL statements</h1>
+                    <h2 class="subheading">Automatic correlating executed SQL statements with exact places in code responsible for triggering them and with detailed use case context, in JPA based applications using JPlusOne library</h2>
+                    <span class="meta">
+                        Posted by 
+                        
+                            Adam Gaj
+                         
+                        on 
+                        Wednesday, December 2, 2020
+                        
+                        
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-11 col-lg-offset-1
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#_what_problem_are_we_solving_here">What problem are we solving here?</a></li>
+        <li><a href="#_logging_jpa_issued_sql_statements_by_hibernate">Logging JPA issued SQL statements by Hibernate</a></li>
+        <li><a href="#_jplusone_comes_to_the_rescue">JPlusOne comes to the rescue</a></li>
+        <li><a href="#_sample_jpa_domain_service">Sample JPA domain &amp; service</a></li>
+        <li><a href="#_reporting_jpa_lazy_loading_operations_and_related_sql_statements">Reporting JPA lazy-loading operations and related SQL statements</a></li>
+        <li><a href="#_reporting_other_types_of_jpa_operations_and_related_sql_statements">Reporting other types of JPA operations and related SQL statements</a></li>
+        <li><a href="#_ensuring_jpa_sql_optimized_service_stays_optimized_in_future">Ensuring JPA / SQL optimized service stays optimized in future</a></li>
+        <li><a href="#_summary">Summary</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+                
+                
+<div class="sect1">
+<h2 id="_what_problem_are_we_solving_here">What problem are we solving here?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>ORM frameworks like Hibernate and other JPA implementors can significantly simplify development of persistence layer.
+Introducing entity abstraction level helps to model clean business domain and to hide underlying SQL statements used to achieve persistence of the domain.
+Such approach is especially useful in large domains, since developer no longer needs to create and maintain all SQL statements used by application.
+Just a few JPA annotations like <code>@Entity</code> / <code>@ManyToOne</code> / <code>@OneToMany</code> etc. on the domain classes and <code>EntityManager</code> or custom repositories
+to obtain domain aggregate roots, and you are ready to go.
+Having that, the vast majority of use cases involving persistence can be handled in domain model by JPA cascades and traversing associations
+and performing operations on them.</p>
+</div>
+<div class="paragraph">
+<p>Everything comes with a price. In exchange for clean and easy development, some issues can arise sooner or later:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Large amount of SQL statements issued by <strong>excessive lady-loading</strong> i.e. due to <em>N+1 SELECT</em> problem</p>
+</li>
+<li>
+<p>Eager fetches performed <strong>in inefficient way</strong> (i.e <code>fetchType = FetchType.EAGER</code> on associations)</p>
+</li>
+<li>
+<p>No easy way to <strong>list all SQL statements</strong> invoked across some use case / service call and to <strong>correlate them with exact lines of code</strong></p>
+</li>
+<li>
+<p>Even if for some use case fetching had been optimized to load all necessary data in efficient way,
+future change in code can silently break it, and there is no way easy to prevent it.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In next steps I’ll show the <strong>new approach</strong> how these problems could be detected, but first let’s see to classic way.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_logging_jpa_issued_sql_statements_by_hibernate">Logging JPA issued SQL statements by Hibernate</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As for now the easiest way to check what SQL statements were executed by JPA was to enable logging of all SQL statements issued by JPA,
+and then investigate one by one if it was triggered by lazy loading or explicit repository call to fetch/flush some data or maybe commit of transaction triggered it.
+To enable logging SQL statements executed by JPA via logger, following properties needs to be added in <code>application.yml</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="yaml"><span class="s">logging.level</span><span class="pi">:</span>
+    <span class="s">org.hibernate.SQL</span><span class="pi">:</span> <span class="s">DEBUG</span>
+
+<span class="na">spring</span><span class="pi">:</span>
+  <span class="na">jpa</span><span class="pi">:</span>
+    <span class="na">properties</span><span class="pi">:</span>
+      <span class="na">hibernate</span><span class="pi">:</span>
+        <span class="na">format_sql</span><span class="pi">:</span> <span class="no">true</span>        <span class="c1"># optional</span>
+        <span class="na">use_sql_comments</span><span class="pi">:</span> <span class="no">true</span>  <span class="c1"># optional</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Logging to stdout (legacy) instead of via logger can be activated by enabling <code>spring.jpa.show-sql</code> property.</p>
+</div>
+<div class="paragraph">
+<p>As a result a log like the one below can be reported:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="sql"><span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">31</span> <span class="mi">19</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">40</span><span class="p">.</span><span class="mi">730</span> <span class="n">DEBUG</span> <span class="mi">15775</span> <span class="c1">--- [           main] org.hibernate.SQL                        :</span>
+    <span class="k">select</span>
+        <span class="n">products0_</span><span class="p">.</span><span class="n">order_id</span> <span class="k">as</span> <span class="n">order_id1_9_0_</span><span class="p">,</span>
+        <span class="n">products0_</span><span class="p">.</span><span class="n">product_id</span> <span class="k">as</span> <span class="n">product_2_9_0_</span><span class="p">,</span>
+        <span class="n">product1_</span><span class="p">.</span><span class="n">id</span> <span class="k">as</span> <span class="n">id1_14_1_</span><span class="p">,</span>
+        <span class="n">product1_</span><span class="p">.</span><span class="n">manufacturer_id</span> <span class="k">as</span> <span class="n">manufact3_14_1_</span><span class="p">,</span>
+        <span class="n">product1_</span><span class="p">.</span><span class="n">name</span> <span class="k">as</span> <span class="n">name2_14_1_</span>
+    <span class="k">from</span>
+        <span class="n">order_product</span> <span class="n">products0_</span>
+    <span class="k">inner</span> <span class="k">join</span>
+        <span class="n">product</span> <span class="n">product1_</span>
+            <span class="k">on</span> <span class="n">products0_</span><span class="p">.</span><span class="n">product_id</span><span class="o">=</span><span class="n">product1_</span><span class="p">.</span><span class="n">id</span>
+    <span class="k">where</span>
+        <span class="n">products0_</span><span class="p">.</span><span class="n">order_id</span><span class="o">=?</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Part of the hibernate logs may contain SQL comments associating SQL statement with the JPA entity class:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="sql"><span class="mi">2020</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">25</span> <span class="mi">23</span><span class="p">:</span><span class="mi">51</span><span class="p">:</span><span class="mi">58</span><span class="p">.</span><span class="mi">390</span> <span class="n">DEBUG</span> <span class="mi">28750</span> <span class="c1">--- [           main] org.hibernate.SQL                        :</span>
+    <span class="cm">/* insert com.adgadev.blog.examples.bookshop.Book */</span> <span class="k">insert</span>
+        <span class="k">into</span>
+            <span class="n">book</span>
+            <span class="p">(</span><span class="n">author_id</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">id</span><span class="p">)</span>
+        <span class="k">values</span>
+            <span class="p">(</span><span class="o">?</span><span class="p">,</span> <span class="o">?</span><span class="p">,</span> <span class="o">?</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In general such logs can be useful, but they lack one crucial information: <strong>How to locate place in application source code responsible for triggering it</strong>.
+Was it executed as a result of initializing entity’s proxy while traversing though JPA entity associations or maybe it was a result of explicit
+JPQL query execution by a service? If multiple various services in the application could have triggered such query which one of them was it? What was the flow?</p>
+</div>
+<div class="paragraph">
+<p>You can try to guess it when the domain and the logic in your codebase is simple or SQL statement points to just one specific place in the code,
+but it’s not always that easy, especially with queries generated by JPA to lazy load some entities. In such case debugging the code and checking
+which exact line causes SQL statement may be the only option. Another problem with debugging is that it can alter the real flow how entities are loaded due
+to resolving variables&#39; values at breakpoint by IDE. Now imagine situation when invoking a service causes dozens of SQL being triggered
+from various places in your code called by such service. Investigating it is cumbersome and can really take a lot of time.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_jplusone_comes_to_the_rescue">JPlusOne comes to the rescue</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://github.com/adgadev/jplusone">JPlusOne</a> library aims to solve these problems.
+It can generate concise reports with all JPA/SQL activity triggered during handling some use cases by your application.
+That way you can easily correlate invoked SQL statements with JPA operations and locate exact lines in the code responsible for issuing them.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="sql"><span class="mi">2020</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">26</span> <span class="mi">22</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mi">52</span><span class="p">.</span><span class="mi">096</span> <span class="n">DEBUG</span> <span class="mi">9990</span> <span class="c1">--- [           main] c.a.j.core.report.ReportGenerator        :</span>
+    <span class="n">ROOT</span>
+        <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">BookshopControllerTest</span><span class="p">.</span><span class="n">shouldGetBookDetails</span><span class="p">(</span><span class="n">BookshopControllerTest</span><span class="p">.</span><span class="n">java</span><span class="p">:</span><span class="mi">46</span><span class="p">)</span>
+        <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">BookshopController</span><span class="p">.</span><span class="n">getSampleBook</span><span class="p">(</span><span class="n">BookshopController</span><span class="p">.</span><span class="n">java</span><span class="p">:</span><span class="mi">31</span><span class="p">)</span>
+        <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">BookshopService</span><span class="p">.</span><span class="n">getSampleBookDetails</span> <span class="p">[</span><span class="n">PROXY</span><span class="p">]</span>
+            <span class="k">SESSION</span> <span class="n">BOUNDARY</span>
+                <span class="k">OPERATION</span> <span class="p">[</span><span class="n">EXPLICIT</span><span class="p">]</span>
+                    <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">BookshopService</span><span class="p">.</span><span class="n">getSampleBookDetails</span><span class="p">(</span><span class="n">BookshopService</span><span class="p">.</span><span class="n">java</span><span class="p">:</span><span class="mi">32</span><span class="p">)</span>
+                    <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">BookRepository</span><span class="p">.</span><span class="n">findById</span> <span class="p">[</span><span class="n">PROXY</span><span class="p">]</span>
+                        <span class="k">STATEMENT</span> <span class="p">[</span><span class="k">READ</span><span class="p">]</span>
+                            <span class="k">select</span> <span class="p">[...]</span> <span class="k">from</span>
+                                <span class="n">book</span> <span class="n">book0_</span>
+                            <span class="k">where</span>
+                                <span class="n">book0_</span><span class="p">.</span><span class="n">id</span><span class="o">=</span><span class="mi">1</span>
+                <span class="k">OPERATION</span> <span class="p">[</span><span class="k">IMPLICIT</span><span class="p">]</span>
+                    <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">BookshopService</span><span class="p">.</span><span class="n">getSampleBookDetails</span><span class="p">(</span><span class="n">BookshopService</span><span class="p">.</span><span class="n">java</span><span class="p">:</span><span class="mi">34</span><span class="p">)</span>
+                    <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">Author</span><span class="p">.</span><span class="n">getName</span> <span class="p">[</span><span class="n">PROXY</span><span class="p">]</span>
+                    <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">Author</span> <span class="p">[</span><span class="n">FETCHING</span> <span class="n">ENTITY</span><span class="p">]</span>
+                        <span class="k">STATEMENT</span> <span class="p">[</span><span class="k">READ</span><span class="p">]</span>
+                            <span class="k">select</span> <span class="p">[...]</span> <span class="k">from</span>
+                                <span class="n">author</span> <span class="n">author0_</span>
+                            <span class="k">where</span>
+                                <span class="n">author0_</span><span class="p">.</span><span class="n">id</span><span class="o">=</span><span class="mi">1</span>
+                <span class="k">OPERATION</span> <span class="p">[</span><span class="k">IMPLICIT</span><span class="p">]</span>
+                    <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">BookshopService</span><span class="p">.</span><span class="n">getSampleBookDetails</span><span class="p">(</span><span class="n">BookshopService</span><span class="p">.</span><span class="n">java</span><span class="p">:</span><span class="mi">35</span><span class="p">)</span>
+                    <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">Author</span><span class="p">.</span><span class="n">countWrittenBooks</span><span class="p">(</span><span class="n">Author</span><span class="p">.</span><span class="n">java</span><span class="p">:</span><span class="mi">41</span><span class="p">)</span>
+                    <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">Author</span><span class="p">.</span><span class="n">books</span> <span class="p">[</span><span class="n">FETCHING</span> <span class="n">COLLECTION</span><span class="p">]</span>
+                        <span class="k">STATEMENT</span> <span class="p">[</span><span class="k">READ</span><span class="p">]</span>
+                            <span class="k">select</span> <span class="p">[...]</span> <span class="k">from</span>
+                                <span class="n">book</span> <span class="n">books0_</span>
+                            <span class="k">where</span>
+                                <span class="n">books0_</span><span class="p">.</span><span class="n">author_id</span><span class="o">=</span><span class="mi">1</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Moreover, it detects what kind of action triggered it:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>implicit fetching single entity to initialize lazy-loaded &#34;one&#34; side of the association (<code>@ManyToOne</code> / <code>@OneToOne</code> with <code>fetch</code> set to <code>LAZY</code>)</p>
+</li>
+<li>
+<p>implicit fetching collection of entities to initialize lazy-loaded &#34;many&#34; side of the association (<code>@OneToMany</code> / <code>@ManyToMany</code> with <code>fetch</code> set to <code>LAZY</code>)</p>
+</li>
+<li>
+<p>explicit fetching of data via repository call (SpringData JPA, custom DAO) or directly via <code>EntityManager</code></p>
+</li>
+<li>
+<p><code>INSERT</code> / <code>SELECT</code> triggered at the transaction commit</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><a href="https://github.com/adgadev/jplusone">JPlusOne</a> is compatible with all Spring Boot 2.x based application running on JDK 9+ with Hibernate as JPA implementor.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sample_jpa_domain_service">Sample JPA domain &amp; service</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To better illustrate the examples let’s assume we have simple domain consisting of two JPA entities. First one is <code>Author</code> entity:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nd">@Getter</span>
+<span class="nd">@Entity</span>
+<span class="kd">class</span> <span class="nc">Author</span> <span class="o">{</span>
+
+    <span class="nd">@Id</span>
+    <span class="kd">private</span> <span class="nc">Long</span> <span class="n">id</span><span class="o">;</span>
+
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+
+    <span class="nd">@OneToMany</span><span class="o">(</span><span class="n">fetch</span> <span class="o">=</span> <span class="nc">FetchType</span><span class="o">.</span><span class="na">LAZY</span><span class="o">,</span> <span class="n">mappedBy</span> <span class="o">=</span> <span class="s">&#34;author&#34;</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">Set</span><span class="o">&lt;</span><span class="nc">Book</span><span class="o">&gt;</span> <span class="n">books</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashSet</span><span class="o">&lt;&gt;();</span>
+
+    <span class="kt">int</span> <span class="nf">countWrittenBooks</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">books</span><span class="o">.</span><span class="na">size</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and second one is <code>Book</code> entity:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nd">@Getter</span>
+<span class="nd">@Entity</span>
+<span class="nd">@EqualsAndHashCode</span><span class="o">(</span><span class="n">of</span> <span class="o">=</span> <span class="s">&#34;id&#34;</span><span class="o">)</span>
+<span class="kd">class</span> <span class="nc">Book</span> <span class="o">{</span>
+
+    <span class="nd">@Id</span>
+    <span class="kd">private</span> <span class="nc">Long</span> <span class="n">id</span><span class="o">;</span>
+
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">title</span><span class="o">;</span>
+
+    <span class="nd">@ManyToOne</span><span class="o">(</span><span class="n">fetch</span> <span class="o">=</span> <span class="nc">FetchType</span><span class="o">.</span><span class="na">LAZY</span><span class="o">)</span>
+    <span class="nd">@JoinColumn</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#34;author_id&#34;</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">Author</span> <span class="n">author</span><span class="o">;</span>
+
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There is also a simple service <code>BookshopService</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nd">@Service</span>
+<span class="nd">@Transactional</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">class</span> <span class="nc">BookshopService</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">BookRepository</span> <span class="n">bookRepository</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nc">BookDto</span> <span class="nf">getSampleBookDetails</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">Book</span> <span class="n">book</span> <span class="o">=</span> <span class="n">bookRepository</span><span class="o">.</span><span class="na">findById</span><span class="o">(</span><span class="mi">1L</span><span class="o">).</span><span class="na">get</span><span class="o">();</span>
+        <span class="nc">String</span> <span class="n">authorName</span> <span class="o">=</span> <span class="n">book</span><span class="o">.</span><span class="na">getAuthor</span><span class="o">().</span><span class="na">getName</span><span class="o">();</span>
+        <span class="kt">int</span> <span class="n">amountOfBooks</span> <span class="o">=</span> <span class="n">book</span><span class="o">.</span><span class="na">getAuthor</span><span class="o">().</span><span class="na">countWrittenBooks</span><span class="o">();</span>
+
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">BookDto</span><span class="o">(</span><span class="n">authorName</span><span class="o">,</span> <span class="n">book</span><span class="o">.</span><span class="na">getTitle</span><span class="o">(),</span> <span class="n">amountOfBooks</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and a simple MVC controller:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nd">@RestController</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">class</span> <span class="nc">BookshopController</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">BookshopService</span> <span class="n">bookshopService</span><span class="o">;</span>
+
+    <span class="nd">@GetMapping</span><span class="o">(</span><span class="s">&#34;/book/lazy&#34;</span><span class="o">)</span>
+    <span class="nc">BookDto</span> <span class="nf">getSampleBook</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">bookshopService</span><span class="o">.</span><span class="na">getSampleBookDetails</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_reporting_jpa_lazy_loading_operations_and_related_sql_statements">Reporting JPA lazy-loading operations and related SQL statements</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In order to detect JPA lazy loading operations let’s add following dependency:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="xml"><span class="nt">&lt;dependency&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.adgadev.jplusone<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>jplusone-core<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.1<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;scope&gt;</span>test<span class="nt">&lt;/scope&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The last step is to configure logger for jplusone, i.e. by adding following lines to <code>application.yml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="yaml"><span class="s">logging.level</span><span class="pi">:</span>
+    <span class="s">com.adgadev.jplusone</span><span class="pi">:</span> <span class="s">DEBUG</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Spring Boot’a autoconfiguration will do the rest of configuration automatically.
+Now let’s run any integration test, which directly or indirectly utilizes JPA persistence,
+i.e. the test which sends request to <code>BookshopController</code> endpoint.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nd">@ActiveProfiles</span><span class="o">(</span><span class="s">&#34;integration-test&#34;</span><span class="o">)</span>
+<span class="nd">@SpringBootTest</span><span class="o">(</span><span class="n">webEnvironment</span> <span class="o">=</span> <span class="no">MOCK</span><span class="o">)</span>
+<span class="nd">@AutoConfigureMockMvc</span>
+<span class="kd">class</span> <span class="nc">BookshopControllerTest</span> <span class="o">{</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">MockMvc</span> <span class="n">mvc</span><span class="o">;</span>
+
+    <span class="nd">@Test</span>
+    <span class="kt">void</span> <span class="nf">shouldGetBookDetails</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+        <span class="n">mvc</span><span class="o">.</span><span class="na">perform</span><span class="o">(</span><span class="nc">MockMvcRequestBuilders</span>
+                <span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">&#34;/book/lazy&#34;</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">accept</span><span class="o">(</span><span class="nc">MediaType</span><span class="o">.</span><span class="na">APPLICATION_JSON</span><span class="o">))</span>
+                <span class="o">.</span><span class="na">andExpect</span><span class="o">(</span><span class="n">status</span><span class="o">().</span><span class="na">isOk</span><span class="o">());</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It will result in adding a log entry containing JPlusOne report of JPA operations / SQL statements, like the one below:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="sql"><span class="mi">2020</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">26</span> <span class="mi">22</span><span class="p">:</span><span class="mi">27</span><span class="p">:</span><span class="mi">59</span><span class="p">.</span><span class="mi">683</span> <span class="n">DEBUG</span> <span class="mi">10730</span> <span class="c1">--- [           main] c.a.j.core.report.ReportGenerator        :</span>
+    <span class="n">ROOT</span>
+        <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">BookshopControllerTest</span><span class="p">.</span><span class="n">shouldGetBookDetails</span><span class="p">(</span><span class="n">BookshopControllerTest</span><span class="p">.</span><span class="n">java</span><span class="p">:</span><span class="mi">46</span><span class="p">)</span>
+        <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">BookshopController</span><span class="p">.</span><span class="n">getSampleBook</span><span class="p">(</span><span class="n">BookshopController</span><span class="p">.</span><span class="n">java</span><span class="p">:</span><span class="mi">31</span><span class="p">)</span>
+        <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">BookshopService</span><span class="p">.</span><span class="n">getSampleBookDetails</span> <span class="p">[</span><span class="n">PROXY</span><span class="p">]</span>
+            <span class="k">SESSION</span> <span class="n">BOUNDARY</span>
+                <span class="k">OPERATION</span> <span class="p">[</span><span class="k">IMPLICIT</span><span class="p">]</span>
+                    <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">BookshopService</span><span class="p">.</span><span class="n">getSampleBookDetails</span><span class="p">(</span><span class="n">BookshopService</span><span class="p">.</span><span class="n">java</span><span class="p">:</span><span class="mi">34</span><span class="p">)</span>
+                    <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">Author</span><span class="p">.</span><span class="n">getName</span> <span class="p">[</span><span class="n">PROXY</span><span class="p">]</span>
+                    <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">Author</span> <span class="p">[</span><span class="n">FETCHING</span> <span class="n">ENTITY</span><span class="p">]</span>
+                        <span class="k">STATEMENT</span> <span class="p">[</span><span class="k">READ</span><span class="p">]</span>
+                            <span class="k">select</span> <span class="p">[...]</span> <span class="k">from</span>
+                                <span class="n">author</span> <span class="n">author0_</span>
+                            <span class="k">where</span>
+                                <span class="n">author0_</span><span class="p">.</span><span class="n">id</span><span class="o">=</span><span class="mi">1</span>
+                <span class="k">OPERATION</span> <span class="p">[</span><span class="k">IMPLICIT</span><span class="p">]</span>
+                    <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">BookshopService</span><span class="p">.</span><span class="n">getSampleBookDetails</span><span class="p">(</span><span class="n">BookshopService</span><span class="p">.</span><span class="n">java</span><span class="p">:</span><span class="mi">35</span><span class="p">)</span>
+                    <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">Author</span><span class="p">.</span><span class="n">countWrittenBooks</span><span class="p">(</span><span class="n">Author</span><span class="p">.</span><span class="n">java</span><span class="p">:</span><span class="mi">41</span><span class="p">)</span>
+                    <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">Author</span><span class="p">.</span><span class="n">books</span> <span class="p">[</span><span class="n">FETCHING</span> <span class="n">COLLECTION</span><span class="p">]</span>
+                        <span class="k">STATEMENT</span> <span class="p">[</span><span class="k">READ</span><span class="p">]</span>
+                            <span class="k">select</span> <span class="p">[...]</span> <span class="k">from</span>
+                                <span class="n">book</span> <span class="n">books0_</span>
+                            <span class="k">where</span>
+                                <span class="n">books0_</span><span class="p">.</span><span class="n">author_id</span><span class="o">=</span><span class="mi">1</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this case we see that there was two lazy loading operations:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Within method <code>BookshopService.getSampleBookDetailsUsingLazyLoading</code> there was execution of method <code>getName</code>
+on object which was proxy to JPA entity <code>Author</code>. As a result initialisation of this proxy object was triggered, causing execution of SQL query.</p>
+</li>
+<li>
+<p>Within method <code>Author.countWrittenBooks</code> a content of collection <code>books</code> representing &#34;many&#34; side of the association with <code>Book</code> entities has been accessed.
+As a result initialisation of this collection was triggered (<code>Author.books</code>) along with execution of SQL query.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Due to the fact that queries generated by JPA, especially those where a few joins are applied, can contain very large number of selected columns,
+which doesn’t bring too much value from performance optimisation point of view but degrade readability of complex SQL statements,
+JPlusOne replaces them with <code>[…​]</code> in a report.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_reporting_other_types_of_jpa_operations_and_related_sql_statements">Reporting other types of JPA operations and related SQL statements</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>By default only lazy loading operations (<code>IMPLICIT</code>) resulting in SQL SELECT statements are included in a report.
+JPA operations related with explicit calls to fetch / flush some data (<code>EXPLICIT</code>) are not included.
+Likewise, operations related with session flush on transaction commit (<code>COMMIT</code>).</p>
+</div>
+<div class="paragraph">
+<p>Default behaviour can be easily changed by defining custom filtering criteria by adding following lines to <code>application.yml</code>
+More details about supported filtering modes and other configuration options can be found in
+<a href="https://github.com/adgadev/jplusone#configuration-properties">JPlusOne documentation</a>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="yaml"><span class="na">jplusone</span><span class="pi">:</span>
+  <span class="na">report</span><span class="pi">:</span>
+    <span class="na">operation-filtering-mode</span><span class="pi">:</span> <span class="s">EXPLICIT_OPERATIONS_ONLY</span>
+    <span class="na">statement-filtering-mode</span><span class="pi">:</span> <span class="s">ALL_STATEMENTS</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Running the same test as in previous example result now in following report:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="sql"><span class="mi">2020</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">26</span> <span class="mi">22</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mi">13</span><span class="p">.</span><span class="mi">497</span> <span class="n">DEBUG</span> <span class="mi">10997</span> <span class="c1">--- [           main] c.a.j.core.report.ReportGenerator        :</span>
+    <span class="n">ROOT</span>
+        <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">BookshopControllerTest</span><span class="p">.</span><span class="n">shouldGetBookDetails</span><span class="p">(</span><span class="n">BookshopControllerTest</span><span class="p">.</span><span class="n">java</span><span class="p">:</span><span class="mi">46</span><span class="p">)</span>
+        <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">BookshopController</span><span class="p">.</span><span class="n">getSampleBook</span><span class="p">(</span><span class="n">BookshopController</span><span class="p">.</span><span class="n">java</span><span class="p">:</span><span class="mi">31</span><span class="p">)</span>
+        <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">BookshopService</span><span class="p">.</span><span class="n">getSampleBookDetails</span> <span class="p">[</span><span class="n">PROXY</span><span class="p">]</span>
+            <span class="k">SESSION</span> <span class="n">BOUNDARY</span>
+                <span class="k">OPERATION</span> <span class="p">[</span><span class="n">EXPLICIT</span><span class="p">]</span>
+                    <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">BookshopService</span><span class="p">.</span><span class="n">getSampleBookDetails</span><span class="p">(</span><span class="n">BookshopService</span><span class="p">.</span><span class="n">java</span><span class="p">:</span><span class="mi">32</span><span class="p">)</span>
+                    <span class="n">com</span><span class="p">.</span><span class="n">adgadev</span><span class="p">.</span><span class="n">examples</span><span class="p">.</span><span class="n">bookshop</span><span class="p">.</span><span class="n">BookRepository</span><span class="p">.</span><span class="n">findById</span> <span class="p">[</span><span class="n">PROXY</span><span class="p">]</span>
+                        <span class="k">STATEMENT</span> <span class="p">[</span><span class="k">READ</span><span class="p">]</span>
+                            <span class="k">select</span> <span class="p">[...]</span> <span class="k">from</span>
+                                <span class="n">book</span> <span class="n">book0_</span>
+                            <span class="k">where</span>
+                                <span class="n">book0_</span><span class="p">.</span><span class="n">id</span><span class="o">=</span><span class="mi">1</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Report shows that there is one explicit fetch operation, triggered in <code>BookshopService.getSampleBookDetailsUsingLazyLoading</code> in line 34
+by calling method <code>findById</code> of Spring Data JPA repository <code>BookRepository</code>, which result in one SQL query being executed.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ensuring_jpa_sql_optimized_service_stays_optimized_in_future">Ensuring JPA / SQL optimized service stays optimized in future</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Nowadays tests no longer serves just purpose of ensuring that a piece of code works as expected and is bug free.
+Other aspects of the code also can be tested. Great example of it is a <a href="https://www.archunit.org/">ArchUnit</a> which allows unit testing
+architecture of the application, i.e. ensuring layered structure of the application is maintained.
+Since you can unit test architecture, why not test if once optimized from JPA/SQL performance point of view use case logic stays optimized
+after future changes in the code? Adding or modifying some JPA mapping / association can easily introduce some additional lazy loading operation
+in some flows, but it may be hard to spot that when such change is applied.</p>
+</div>
+<div class="paragraph">
+<p>Let’s extend integration test from previous example with validation checking that there are only two JPA lazy loading
+operations: first for loading <code>Author</code> JPA entity, and second for loading <code>Author.books</code> collection.
+In order to write such tests following dependency needs to be added:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="xml"><span class="nt">&lt;dependency&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.adgadev.jplusone<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>jplusone-assert<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.1<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;scope&gt;</span>test<span class="nt">&lt;/scope&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and then <code>JPlusOneAssertionRule</code> object has to be defined and checked against injected <code>assertionContext</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nd">@ActiveProfiles</span><span class="o">(</span><span class="s">&#34;integration-test&#34;</span><span class="o">)</span>
+<span class="nd">@SpringBootTest</span><span class="o">(</span><span class="n">webEnvironment</span> <span class="o">=</span> <span class="no">MOCK</span><span class="o">)</span>
+<span class="nd">@AutoConfigureMockMvc</span>
+<span class="kd">class</span> <span class="nc">BookshopControllerTest</span> <span class="o">{</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">JPlusOneAssertionContext</span> <span class="n">assertionContext</span><span class="o">;</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">MockMvc</span> <span class="n">mvc</span><span class="o">;</span>
+
+    <span class="nd">@Test</span>
+    <span class="kt">void</span> <span class="nf">shouldGetBookDetails</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+        <span class="n">mvc</span><span class="o">.</span><span class="na">perform</span><span class="o">(</span><span class="nc">MockMvcRequestBuilders</span>
+                <span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">&#34;/book/lazy&#34;</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">accept</span><span class="o">(</span><span class="nc">MediaType</span><span class="o">.</span><span class="na">APPLICATION_JSON</span><span class="o">))</span>
+                <span class="o">.</span><span class="na">andExpect</span><span class="o">(</span><span class="n">status</span><span class="o">().</span><span class="na">isOk</span><span class="o">());</span>
+
+        <span class="nc">JPlusOneAssertionRule</span> <span class="n">rule</span> <span class="o">=</span> <span class="nc">JPlusOneAssertionRule</span>
+                <span class="o">.</span><span class="na">within</span><span class="o">().</span><span class="na">lastSession</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">shouldBe</span><span class="o">().</span><span class="na">noImplicitOperations</span><span class="o">().</span><span class="na">exceptAnyOf</span><span class="o">(</span><span class="n">exclusions</span> <span class="o">-&gt;</span> <span class="n">exclusions</span>
+                        <span class="o">.</span><span class="na">loadingEntity</span><span class="o">(</span><span class="nc">Author</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+                        <span class="o">.</span><span class="na">loadingCollection</span><span class="o">(</span><span class="nc">Author</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="s">&#34;books&#34;</span><span class="o">)</span>
+                <span class="o">);</span>
+        <span class="n">rule</span><span class="o">.</span><span class="na">check</span><span class="o">(</span><span class="n">assertionContext</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Since the rule is fulfilled the test is green. Let’s see what happens when third lazy loading operation is introduced to implementation.
+The easiest way to do that would be to change single line in <code>BookshopService.getSampleBookDetailsUsingLazyLoading</code> from:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java">        <span class="nc">Book</span> <span class="n">book</span> <span class="o">=</span> <span class="n">bookRepository</span><span class="o">.</span><span class="na">findById</span><span class="o">(</span><span class="mi">1L</span><span class="o">).</span><span class="na">get</span><span class="o">();</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>to:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java">        <span class="nc">Book</span> <span class="n">book</span> <span class="o">=</span> <span class="n">bookRepository</span><span class="o">.</span><span class="na">getOne</span><span class="o">(</span><span class="mi">1L</span><span class="o">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>causing JPA proxy being returned instead of JPA entity. The proxy will be initialized on first operation invoked on it,
+leading to lazy-loading of <code>Book</code> entity. When test is re-run <code>AssertionError</code> is thrown:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code>java.lang.AssertionError: Actual amount of IMPLICIT operations after applying exclusions is different than the expected amount
+    Expected: exactly <b class="conum">(0)</b>
+    Actual  : <b class="conum">(1)</b>
+
+Operations after applying requested exclusions:
+    ROOT
+        com.adgadev.examples.bookshop.BookshopControllerTest.shouldGetBookDetails(BookshopControllerTest.java:46)
+        com.adgadev.examples.bookshop.BookshopController.getSampleBook(BookshopController.java:31)
+        com.adgadev.examples.bookshop.BookshopService.getSampleBookDetails [PROXY]
+            SESSION BOUNDARY
+                OPERATION [IMPLICIT]
+                    com.adgadev.examples.bookshop.BookshopService.getSampleBookDetails(BookshopService.java:34)
+                    com.adgadev.examples.bookshop.Book.getAuthor [PROXY]
+                    com.adgadev.examples.bookshop.Book [FETCHING ENTITY]
+                        STATEMENT [READ]
+                            select [...] from
+                                book book0_
+                            where
+                                book0_.id=1
+
+	at com.adgadev.jplusone.asserts.impl.rule.AmountVerifier.checkAmount(AmountVerifier.java:44)
+	at com.adgadev.jplusone.asserts.impl.rule.Condition.checkOperation(Condition.java:84)
+	at com.adgadev.jplusone.asserts.impl.rule.Condition.check(Condition.java:54)
+	at com.adgadev.jplusone.asserts.impl.rule.Rule.lambda$check$0(Rule.java:48)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1540)
+	at com.adgadev.jplusone.asserts.impl.rule.Rule.check(Rule.java:48)
+	at com.adgadev.jplusone.asserts.impl.Assertion.check(Assertion.java:38)
+	at com.adgadev.jplusone.asserts.impl.ConditionDoneBuilderImpl.check(ConditionDoneBuilderImpl.java:38)
+	at com.adgadev.examples.bookshop.BookshopControllerTest.shouldGetBookDetails(BookshopControllerTest.java:57)
+    ...</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_summary">Summary</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The full source code of the examples is available <a href="https://github.com/adgadev/blog-examples/tree/master/jplusone-in-action">here</a>.</p>
+</div>
+<div class="paragraph">
+<p>If you find <a href="https://github.com/adgadev/jplusone">JPlusOne library</a> useful and worth further development, please star the project repository on <a href="https://github.com/adgadev/jplusone">GitHub</a>, thanks!</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><a class="image" href="https://github.com/adgadev/jplusone"><img src="https://img.shields.io/github/stars/adgadev/jplusone?style=social" alt="GitHub Repo stars"/></a></span></p>
+</div>
+</div>
+</div>
+
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+<div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "adgadev" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-11 col-lg-offset-1
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        <a href="/tags/java" title="java">
+                            java
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/jpa" title="jpa">
+                            jpa
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/jplusone" title="jplusone">
+                            jplusone
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/n&#43;1-select-problem" title="n&#43;1-select-problem">
+                            n&#43;1-select-problem
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/performance" title="performance">
+                            performance
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/spring-boot" title="spring-boot">
+                            spring-boot
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/sql" title="sql">
+                            sql
+                        </a>
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href='' rel="alternate" type="application/rss+xml" title="/adgadev/" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:adgadev@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a href="https://twitter.com/adgadev">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/adgadev">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://stackoverflow.com/users/14231619">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+            
+                    
+                    
+                    
+            
+            
+            
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy; Adam Gaj 2020
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-183852793-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+</body>
+</html>

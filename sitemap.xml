@@ -4,17 +4,67 @@
   
   <url>
     <loc>https://adgadev.com/</loc>
-    <lastmod>2020-10-28T00:00:00+00:00</lastmod>
+    <lastmod>2020-12-02T20:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://adgadev.com/categories/blog/</loc>
+    <lastmod>2020-12-02T20:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://adgadev.com/categories/</loc>
+    <lastmod>2020-12-02T20:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://adgadev.com/finding-origin-and-context-of-jpa-issued-sql-statemets/</loc>
+    <lastmod>2020-12-02T20:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://adgadev.com/tags/java/</loc>
+    <lastmod>2020-12-02T20:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://adgadev.com/tags/jpa/</loc>
+    <lastmod>2020-12-02T20:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://adgadev.com/tags/jplusone/</loc>
+    <lastmod>2020-12-02T20:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://adgadev.com/tags/n&#43;1-select-problem/</loc>
+    <lastmod>2020-12-02T20:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://adgadev.com/tags/performance/</loc>
+    <lastmod>2020-12-02T20:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>https://adgadev.com/post/</loc>
-    <lastmod>2020-10-28T00:00:00+00:00</lastmod>
+    <lastmod>2020-12-02T20:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://adgadev.com/2020/10/28/hello-world/</loc>
-    <lastmod>2020-10-28T00:00:00+00:00</lastmod>
+    <loc>https://adgadev.com/tags/spring-boot/</loc>
+    <lastmod>2020-12-02T20:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://adgadev.com/tags/sql/</loc>
+    <lastmod>2020-12-02T20:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://adgadev.com/tags/</loc>
+    <lastmod>2020-12-02T20:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -26,15 +76,7 @@
   </url>
   
   <url>
-    <loc>https://adgadev.com/categories/</loc>
-  </url>
-  
-  <url>
     <loc>https://adgadev.com/search/</loc>
-  </url>
-  
-  <url>
-    <loc>https://adgadev.com/tags/</loc>
   </url>
   
   <url>
