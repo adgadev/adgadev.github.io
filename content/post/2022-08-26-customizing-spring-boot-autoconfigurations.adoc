@@ -1,0 +1,296 @@
+---
+title: "Extending and customizing auto-configuration classes provided by Spring Boot"
+subtitle: "How to dynamically exclude selected Spring Boot auto-configuration classes using profile groups"
+author: "Adam Gaj"
+published: true
+image: "img/bg/maxime-lebrun-cTFSEWejQHE-unsplash.jpg"
+date: 2022-08-26 18:00:00
+url: customizing-spring-boot-autoconfigurations
+showtoc: false
+tags:
+    - Java
+    - Spring Boot
+categories: [ "Blog" ]
+---
+
+:icons: font
+:source-highlighter: rouge
+:rouge-style: base16.dark
+:release_version: 1.0.1
+:toc:
+
+== Problem statement
+
+Imagine a scenario when we need to enable certain spring boot auto-configuration on a subset of environments only. The reason for that may be that i.e. our new feature will use new database (mongo) which hasn't been setup on all environments yet for some reason, but we don't want this issue to stop us from deploying new version of the application.
+
+Not all spring boot auto-configurations support disabling them using property. We could try to exclude auto-configurations by declaring them in `exclusions` property of `@SpringBootApplication` and later import these auto-configurations using `@Import` or `@ImportAutoConfiguration` in profile specific configuration. Unfortunately this approach often does not work. Basically mixing auto-configuration and manual imports often leads to hard to diagnose configuration errors. Fortunately there is a better way which is purely based on auto-configuration.
+
+
+=== Profile groups
+
+Spring boot 2.4 introduced concept of 'profile groups' which allows expanding single profile into multiple sub-profiles.
+We can use profile groups to map a single profile identifying environment where application is running (`dev` / `stage` / `prod`) to set of features which are enabled at each environment.
+In order to use profile groups we need to define `spring.profiles.group` section in  `application.yml`
+[source,yaml]
+----
+spring:
+  profiles:
+    group:
+      dev: bravo, halo
+      prod: bravo
+----
+Such setup will result in having active profiles: `dev`, `bravo`, `halo` on `dev` environment. On `prod` environment only `prod` and `bravo` profiles will be active.
+
+=== Feature specific auto-configuration
+
+In our case we will be building a feature based on mongoDb. When feature is disabled, the application should not require mongo database to exist nor utilize any mongo auto-configurations, since it's the only feature using mongodb in our app. Apart from that all services, controllers and other application spring beans related with this feature should be created only when feature is enabled.
+
+For start, we need to define annotation which will allow binding feature specific components & configurations with a dedicated spring profile.
+[source,java]
+----
+@Profile("halo")
+@Retention(RetentionPolicy.RUNTIME)
+public @interface HaloFeature {
+}
+----
+
+Next thing is to add auto-configuration's condition which will allow enabling feature specific auto-configurations when feature profile is active:
+
+[source,java]
+----
+class HaloProfileCondition implements Condition {
+
+    private static final Profiles HALO_PROFILE = Profiles.of("halo");
+
+    @Override
+    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+        return context.getEnvironment().acceptsProfiles(HALO_PROFILE);
+    }
+}
+----
+
+There are three mongo related auto-configurations used by our application. They need to be made conditional. Let's create new auto-configuration classes which are subclasses of original auto-configurations and annotate them with `@Conditional` utilizing feature condition:
+
+
+[source,java]
+----
+@Configuration
+@Conditional(HaloProfileCondition.class)
+class HaloMongoAutoConfiguration extends MongoAutoConfiguration {
+}
+----
+
+[source,java]
+----
+@Configuration
+@Conditional(HaloProfileCondition.class)
+class HaloMongoDataAutoConfiguration extends MongoDataAutoConfiguration {
+}
+----
+
+[source,java]
+----
+@Configuration
+@Conditional(HaloProfileCondition.class)
+class HaloMongoRepositoriesAutoConfiguration extends MongoRepositoriesAutoConfiguration {
+}
+----
+Unfortunately this is not sufficient since spring boot conditional rules are not being inherited by subclasses. Hence, conditional rules has to be copied from `MongoAutoConfiguration`, `MongoDataAutoConfiguration` and `MongoRepositoriesAutoConfiguration` to their subclasses.
+
+The other thing is that dependencies declared in `@AutoConfigureAfter` / `@AutoConfigureBefore` should refer to auto-configuration classes, not their subclasses. Otherwise, they won't work. That's why these annotations has to be copied from superclass to subclasses, but this time values inside annotations has to be replaced with corresponding `Halo*AutoConfiguration` classes.
+
+Other spring's annotations used in auto-configuration subclasses like i.e. `@Import` or `@EnableConfigurationProperties` will work as if they were part of subclass auto-configuration, so there is no need to copy them from subclass.
+
+After applying these changes we get following auto-configuration classes:
+
+[source,java]
+----
+@Configuration
+@Conditional(HaloProfileCondition.class)
+@ConditionalOnClass(MongoClient.class)
+@ConditionalOnMissingBean(type = "org.springframework.data.mongodb.MongoDatabaseFactory")
+class HaloMongoAutoConfiguration extends MongoAutoConfiguration {
+}
+----
+
+[source,java]
+----
+@Configuration
+@Conditional(HaloProfileCondition.class)
+@ConditionalOnClass({ MongoClient.class, MongoTemplate.class })
+@AutoConfigureAfter(HaloMongoAutoConfiguration.class)
+class HaloMongoDataAutoConfiguration extends MongoDataAutoConfiguration {
+}
+----
+
+[source,java]
+----
+@Configuration
+@Conditional(HaloProfileCondition.class)
+@ConditionalOnClass({ MongoClient.class, MongoRepository.class })
+@ConditionalOnMissingBean({ MongoRepositoryFactoryBean.class, MongoRepositoryConfigurationExtension.class })
+@ConditionalOnRepositoryType(store = "mongodb", type = RepositoryType.IMPERATIVE)
+@AutoConfigureAfter(HaloMongoDataAutoConfiguration.class)
+class HaloMongoRepositoriesAutoConfiguration extends MongoRepositoriesAutoConfiguration {
+}
+----
+
+New auto-configurations have to be registered in `META-INF/spring.factories` file:
+[source,properties]
+----
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.adgadev.examples.featureflags.infrastructure.halo.HaloMongoAutoConfiguration,\
+  com.adgadev.examples.featureflags.infrastructure.halo.HaloMongoDataAutoConfiguration,\
+  com.adgadev.examples.featureflags.infrastructure.halo.HaloMongoRepositoriesAutoConfiguration
+----
+
+Now let's exclude original mongo auto-configurations:
+[source,java]
+----
+@SpringBootApplication(exclude = {
+        MongoAutoConfiguration.class,
+        MongoDataAutoConfiguration.class,
+        MongoRepositoriesAutoConfiguration.class
+})
+public class DemoApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplication.class, args);
+    }
+}
+----
+
+=== Applying solution to sample feature
+
+Having conditional mongo setup in place we can add simple mongo dependant feature called `halo`. The feature consists of single document, mongo repository and a service. Repository and service beans are created only if the `halo` feature is enabled.
+
+[source,java]
+----
+@Getter
+@Document("halo")
+@AllArgsConstructor
+public class HaloEntity {
+
+    @Id
+    private String id;
+
+    private String name;
+}
+----
+
+[source,java]
+----
+public interface HaloRepository {
+
+    HaloEntity save(HaloEntity haloEntity);
+
+    Optional<HaloEntity> findById(String id);
+}
+----
+
+[source,java]
+----
+@HaloFeature
+interface MongoHaloRepository extends HaloRepository, MongoRepository<HaloEntity, String> {
+}
+----
+
+[source,java]
+----
+@Service
+@HaloFeature
+@RequiredArgsConstructor
+public class HaloService {
+
+    private final HaloRepository haloRepository;
+
+    public HaloEntity addHalo(String name) {
+        var haloEntity = new HaloEntity(UUID.randomUUID().toString(), name);
+        return haloRepository.save(haloEntity);
+    }
+
+    public HaloEntity getHalo(String id) {
+        return haloRepository.findById(id).orElseThrow();
+    }
+
+}
+----
+
+There is also spring configuration which enables mongock framework for document migration and explicitly defines mongo repositories package:
+[source, java]
+----
+@HaloFeature
+@Configuration
+@EnableMongock
+@EnableMongoRepositories(basePackageClasses = MongoHaloRepository.class)
+class MongoCustomisationsConfig {
+}
+----
+
+Now let's test how this feature works assuming it's enabled only on dev and mongo database is present there only.
+
+[source,yml]
+----
+spring:
+  profiles:
+    group:
+      dev: halo
+      prod:
+----
+
+Test is very simple. It creates mongo database using testcontainers, starts spring context and tests `haloService` in such environment. The test is green when executed.
+[source,java]
+----
+@Testcontainers
+@SpringBootTest
+@ActiveProfiles("dev")
+class DevProfileDemoApplicationTest {
+
+    @Container
+    static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:4.4.2");
+
+    @DynamicPropertySource
+    static void setProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+    }
+
+    @Autowired
+    private HaloService haloService;
+
+    @Test
+    void shouldExecuteOperationOnMongo() {
+        HaloEntity haloEntity = haloService.addHalo("some name");
+        assertNotNull(haloService.getHalo(haloEntity.getId()));
+    }
+}
+----
+
+Test for prod env shows that application context starts successfully, despite the fact that there is no mongo database configured. None mongo or halo related spring been is constructed.
+[source,java]
+----
+@SpringBootTest
+@ActiveProfiles("prod")
+class ProdProfileDemoApplicationTest {
+
+    @Test
+    void contextLoads() {
+    }
+}
+----
+The same test, but with `halo` feature enabled fails on spring context creation, due to connectivity issues to mongo database when instantiating mongock's beans.
+[source,java]
+----
+@SpringBootTest(properties = "spring.profiles.group.prod=halo")
+@ActiveProfiles("prod")
+class ProdProfileDemoApplicationTest {
+
+    @Test
+    void contextLoads() {
+    }
+}
+----
+
+== Summary
+
+The full source code of the examples is available https://github.com/adgadev/blog-examples/tree/master/spring-boot-feature-flags[here].
+
+
