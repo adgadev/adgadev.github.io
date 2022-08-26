@@ -6,13 +6,22 @@
     <description>Recent content in Tags on /adgadev/</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 02 Dec 2020 20:00:00 +0000</lastBuildDate><atom:link href="https://adgadev.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 26 Aug 2022 18:00:00 +0000</lastBuildDate><atom:link href="https://adgadev.com/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Java</title>
       <link>https://adgadev.com/tags/java/</link>
-      <pubDate>Wed, 02 Dec 2020 20:00:00 +0000</pubDate>
+      <pubDate>Fri, 26 Aug 2022 18:00:00 +0000</pubDate>
       
       <guid>https://adgadev.com/tags/java/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Spring Boot</title>
+      <link>https://adgadev.com/tags/spring-boot/</link>
+      <pubDate>Fri, 26 Aug 2022 18:00:00 +0000</pubDate>
+      
+      <guid>https://adgadev.com/tags/spring-boot/</guid>
       <description></description>
     </item>
     
@@ -49,15 +58,6 @@
       <pubDate>Wed, 02 Dec 2020 20:00:00 +0000</pubDate>
       
       <guid>https://adgadev.com/tags/performance/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Spring Boot</title>
-      <link>https://adgadev.com/tags/spring-boot/</link>
-      <pubDate>Wed, 02 Dec 2020 20:00:00 +0000</pubDate>
-      
-      <guid>https://adgadev.com/tags/spring-boot/</guid>
       <description></description>
     </item>
     

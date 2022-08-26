@@ -6,7 +6,17 @@
     <description>Recent content in Spring Boot on /adgadev/</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 02 Dec 2020 20:00:00 +0000</lastBuildDate><atom:link href="https://adgadev.com/tags/spring-boot/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 26 Aug 2022 18:00:00 +0000</lastBuildDate><atom:link href="https://adgadev.com/tags/spring-boot/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Extending and customizing auto-configuration classes provided by Spring Boot</title>
+      <link>https://adgadev.com/customizing-spring-boot-autoconfigurations/</link>
+      <pubDate>Fri, 26 Aug 2022 18:00:00 +0000</pubDate>
+      
+      <guid>https://adgadev.com/customizing-spring-boot-autoconfigurations/</guid>
+      <description>Problem statement Imagine a scenario when we need to enable certain spring boot auto-configuration on a subset of environments only. The reason for that may be that i.e. our new feature will use new database (mongo) which hasn’t been setup on all environments yet for some reason, but we don’t want this issue to stop us from deploying new version of the application.
+ Not all spring boot auto-configurations support disabling them using property.</description>
+    </item>
+    
     <item>
       <title>Finding origin and context of JPA issued SQL statements</title>
       <link>https://adgadev.com/finding-origin-and-context-of-jpa-issued-sql-statemets/</link>
